@@ -2,6 +2,7 @@ package tapi.api;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +35,8 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutionException;
 
 import static java.lang.Thread.sleep;
@@ -53,7 +50,7 @@ public class APIController
     private static final String ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
     private final Map<String, TokenInfo> tokenData = new ConcurrentHashMap<>();
-    private final ConcurrentLinkedDeque<MessageData> messageData = new ConcurrentLinkedDeque<>();
+    private final Map<Long, MessageData> messageData = new ConcurrentHashMap<>();
 
     private final String INFURA_KEY;
     private final String INFURA_IPFS_KEY;
@@ -77,8 +74,6 @@ public class APIController
                 .subscribe(f -> System.out.println("Finish"), Throwable::printStackTrace)
                 .isDisposed();
     }
-
-
 
     private void connectToScriptProxy()
     {
@@ -190,7 +185,7 @@ public class APIController
 
                 //String tAddr, long cId, long tId, String msg
                 MessageData msg = new MessageData(tokenAddress, chainId, tokenId, message);
-                messageData.add(msg);
+                messageData.put(System.currentTimeMillis(), msg);
 
                 break;
             default:
@@ -395,10 +390,22 @@ public class APIController
     {
         //inject JSON
         StringBuilder sb = new StringBuilder();
-        MessageData msg = messageData.pollLast();
-        while (msg != null)
+
+        Set<Long> keySet = messageData.keySet();
+
+        List<Long> keySetSorted = new ArrayList<>(keySet);
+        Collections.sort(keySetSorted);
+
+        for (int i = keySetSorted.size() - 1; i >= 0; i--)
         {
-            String tokenKey = msg.tokenAddr + "-" + msg.tokenId;
+            long key = (long)keySetSorted.toArray()[i];
+            MessageData msg = messageData.get(key);
+//        }
+//
+//        for (Map.Entry<Long, MessageData> entry : messageData.entrySet())
+//        {
+//            MessageData msg = entry.getValue();
+            String tokenKey = msg.tokenAddr + "-" + msg.chainId;
             TokenInfo tInfo = tokenData.get(tokenKey);
 
             //do something
@@ -415,10 +422,7 @@ public class APIController
                     "                        >Etherscan</a\n" +
                     "                      >\n" +
                     "                    </div>\n" +
-                    "                  </div>\n" +
-                    "              ;");
-
-            msg = messageData.pollLast();
+                    "                  </div>\n");
         }
 
         model.addAttribute("tokenlist", sb.toString());
@@ -436,8 +440,9 @@ public class APIController
 
         //output a JSON
         JSONArray jsonArray = new JSONArray();
-        for (MessageData msgData : messageData)
+        for (Map.Entry<Long, MessageData> entry : messageData.entrySet())
         {
+            MessageData msgData = entry.getValue();
             String tKey = msgData.tokenAddr + "-" + msgData.chainId;
             JSONObject obj = new JSONObject();
             TokenInfo tInfo = tokenData.get(tKey);
