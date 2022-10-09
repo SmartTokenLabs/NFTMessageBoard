@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -234,67 +234,24 @@
         />
       </div>
       <div
-        class="ts-app-wrapper-main ts-app-wrapper ts-app-wrapper--medium ts-app-wrapper--primary"
-      >
+        class="ts-app-wrapper-main ts-app-wrapper ts-app-wrapper--medium ts-app-wrapper--primary">
         <div id="msg-box" class="ts-app-msg-items-container"></div>
       </div>
 
       <div class="push"></div>
 
+    <script th:inline="javascript">
 
-    <script>
+      function populateCode()
+      {
+        var tokenList = [[${tokenlist}]];
 
-      var messages = [];
-      var poll = 5000; //30000;
-      var endpoint = "http://smarttokenlabs.duckdns.org:8080/getMessages";
+        var elRef = document.getElementById('msg-box');
 
-      setInterval(() => {
-        
-        fetch(endpoint)
-        .then(data => {
-          return data.json();
-        })
-        .then(post => {
-          if(post.data) {
-            var allMessages = post.data;
-
-            // if messages is empty, add all
-            if(messages.length === 0) {
-              embedMessages(allMessages);
-              messages = allMessages;
-            } else { // if messages is not empty add new only
-              var newMessages = allMessages.splice(messages.length, messages.length +1);
-              if(newMessages.length) {
-                messages.push(newMessages);
-                embedMessages(newMessages);
-              }
-            }
-            
-          }
-
-        });
-        
-      }, poll);
-
-      function embedMessages(messages) {
-
-        if(messages.length) {
-
-          messages.map((item, index) => {
-
-            var elRef = document.getElementById('msg-box');
-
-            setTimeout(() => {
-
-              elRef.innerHTML += '<div class="ts-app-msg-item-container"><img src="http://placekitten.com/300/300" alt="Avatar" /><div class="msg-text-container"><p>${item.msg}</p></div><div class="ts-app-meta-container">Symbol: ${item.symbol} (${item.chain}), TokenID: ${item.tokenid}</div><div class="ts-app-address-container"><a target="_BLANK" href="https://goerli.etherscan.io/address/${item.tokenaddr}">Etherscan</a></div></div>';
-
-            }, index * 200);
-            
-          });
-
-        }
-
+        elRef.innerHTML = tokenList;
       }
+
+      window.onload = populateCode;
 
     </script>
 

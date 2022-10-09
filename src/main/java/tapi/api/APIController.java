@@ -394,10 +394,34 @@ public class APIController
                           Model model)
     {
         //inject JSON
-        for ()
+        StringBuilder sb = new StringBuilder();
+        MessageData msg = messageData.pollLast();
+        while (msg != null)
+        {
+            String tokenKey = msg.tokenAddr + "-" + msg.tokenId;
+            TokenInfo tInfo = tokenData.get(tokenKey);
 
+            //do something
+            sb.append("<div class=\"ts-app-msg-item-container\">\n" +
+                    "                  <img src=\"http://placekitten.com/300/300\" alt=\"Avatar\" />\n" +
+                    "                    <div class=\"msg-text-container\">\n" +
+                    "                      <p>" + msg.message + "</p>\n" +
+                    "                    </div>\n" +
+                    "                    <div class=\"ts-app-meta-container\">Symbol: " + tInfo.tokenSymbol + " (" + msg.chainId + "), TokenID: " + msg.tokenId + "</div>\n" +
+                    "                    <div class=\"ts-app-address-container\">\n" +
+                    "                      <a\n" +
+                    "                        target=\"_BLANK\"\n" +
+                    "                        href=\"https://goerli.etherscan.io/address/" + msg.tokenAddr + "\"\n" +
+                    "                        >Etherscan</a\n" +
+                    "                      >\n" +
+                    "                    </div>\n" +
+                    "                  </div>\n" +
+                    "              ;");
 
-        model.addAttribute("account", "'" + account + "'");
+            msg = messageData.pollLast();
+        }
+
+        model.addAttribute("tokenlist", sb.toString());
 
         return "client_view_front_fallback";
     }
