@@ -96,6 +96,8 @@ public class APIController
 
             int state = 0;
 
+            long currentTime = System.currentTimeMillis();
+
             while (true)
             {
                 if (state == 0)
@@ -133,7 +135,13 @@ public class APIController
                     }
                 }
 
-                sleep(10);
+                sleep(100);
+
+                if (System.currentTimeMillis() > currentTime + 90*1000)
+                {
+                    currentTime = System.currentTimeMillis();
+                    state = 0;
+                }
             }
         }
         catch (Exception e)
