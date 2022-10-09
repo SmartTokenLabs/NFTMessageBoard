@@ -11,43 +11,40 @@
         font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial,
           sans-serif;
       }
-      .cl-link-form {
+      .app-wrapper {
         min-width: 320px;
-        font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial,
-          sans-serif;
         border: 0;
         border-radius: 0.2em;
         display: block;
         line-height: 1;
       }
-      .cl-link-form input {
+      .app-wrapper input {
         width: calc(100% - 24px);
         margin: 12px 0;
       }
-      .cl-link-form .cl-submit {
+      .app-wrapper .ts-app-submit {
         width: 40%;
         margin: 21px 0% 8px 30%;
       }
-      .cl-link-form--primary {
+      .app-wrapper--primary {
         color: grey;
         border: 1px solid rgba(0, 0, 0, 0.1);
       }
-      .cl-link-form--secondary {
+      .app-wrapper--secondary {
         color: #333;
         background-color: transparent;
         box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 0px 1px inset;
       }
-      .cl-link-form--small {
+      .app-wrapper--small {
         padding: 12px;
       }
-      .cl-link-form--medium {
+      .app-wrapper--medium {
         padding: 14px;
       }
-      .cl-link-form--large {
+      .app-wrapper--large {
         padding: 16px;
       }
-
-      .cl-submit {
+      .ts-app-submit {
         font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial,
           sans-serif;
         font-weight: 700;
@@ -57,32 +54,31 @@
         display: inline-block;
         line-height: 1;
       }
-      .cl-submit:focus {
+      .ts-app-submit:focus {
         outline-color: #1ea7fd;
       }
-      .cl-submit--primary {
+      .ts-app-submit--primary {
         color: white;
         background-color: #1ea7fd;
       }
-      .cl-submit--secondary {
+      .ts-app-submit--secondary {
         color: #333;
         background-color: transparent;
         box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 0px 1px inset;
       }
-      .cl-submit--small {
+      .ts-app-submit--small {
         font-size: 12px;
         padding: 10px 16px;
       }
-      .cl-submit--medium {
+      .ts-app-submit--medium {
         font-size: 14px;
         padding: 11px 20px;
       }
-      .cl-submit--large {
+      .ts-app-submit--large {
         font-size: 16px;
         padding: 12px 24px;
       }
-
-      .cl-form-input {
+      .ts-app-form-input {
         font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial,
           sans-serif;
         font-weight: normal;
@@ -91,46 +87,41 @@
         display: block;
         line-height: 1;
       }
-      .cl-form-input:focus {
+      .ts-app-form-input:focus {
         outline-color: #1ea7fd;
       }
-      .cl-form-input--primary {
+      .ts-app-form-input--primary {
         color: white;
         background: #1ea7fd;
       }
-
-      .cl-form-input--primary::placeholder {
+      .ts-app-form-input--primary::placeholder {
         /* Chrome, Firefox, Opera, Safari 10.1+ */
         color: white;
         opacity: 1; /* Firefox */
       }
-
-      .cl-form-input--primary:-ms-input-placeholder {
+      .ts-app-form-input--primary:-ms-input-placeholder {
         /* Internet Explorer 10-11 */
         color: white;
       }
-
-      .cl-form-input--primary::-ms-input-placeholder {
+      .ts-app-form-input--primary::-ms-input-placeholder {
         /* Microsoft Edge */
         color: white;
       }
-
-      .cl-form-input--secondary {
+      .ts-app-form-input--secondary {
         color: #333;
         background-color: transparent;
         box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 0px 1px inset;
       }
-      .cl-form-input--small {
+      .ts-app-form-input--small {
         padding: 12px;
       }
-      .cl-form-input--medium {
+      .ts-app-form-input--medium {
         padding: 14px;
       }
-      .cl-form-input--large {
+      .ts-app-form-input--large {
         padding: 16px;
       }
-
-      .msg-item-container {
+      .ts-app-msg-item-container {
         position: relative;
         border: 1px solid #dedede;
         border-radius: 5px;
@@ -140,22 +131,14 @@
         margin: 45px 0;
       }
 
-      .msg-item-container img {
+      .ts-app-msg-item-container img {
         width: 60px;
         height: 60px;
         margin-right: 20px;
         border-radius: 50%;
       }
 
-      .meta-right {
-        color: #aaa;
-      }
-
-      .meta-left {
-        color: #999;
-      }
-
-      .address-container {
+      .ts-app-meta-container {
         position: absolute;
         bottom: 0;
         right: 0;
@@ -166,7 +149,7 @@
         font-size: 12px;
       }
 
-      .address-container-2 {
+      .ts-app-address-container {
         position: absolute;
         top: -27px;
         right: 3px;
@@ -174,14 +157,6 @@
         font-size: 11px;
       }
       
-      .address-container-3 {
-        position: absolute;
-        top: -27px;
-        left: 3px;
-        padding: 7px;
-        font-size: 11px;
-      }
-
       .msg-text-container {
         margin-bottom: 30px;
       }
@@ -193,9 +168,9 @@
     </style>
   </head>
   <body>
-    <div class="cl-link-form cl-link-form--medium cl-link-form--primary">
+    <div class="app-wrapper app-wrapper--medium app-wrapper--primary">
       <div>
-        <div class="msg-item-container">
+        <div class="ts-app-msg-item-container">
           <img src="http://placekitten.com/300/300" alt="Avatar" />
           <div class="msg-text-container">
             <div class="msg-name">Metadata Test</div>
@@ -204,70 +179,22 @@
               with the vampire Interview with the vampire
             </p>
           </div>
-          <div class="address-container">
+          <div class="ts-app-meta-container">
             Chain: META (5), TokenID: 2
           </div>
-          <div class="address-container-2">
-            <a href="https://etherscan.io/address/0x8b0fefd94667fdd8cef52f8c1eeb5baec8d64a00">TECHNICETH</a>
-          </div>
-        </div>
-        <div class="msg-item-container">
-          <img src="http://placekitten.com/300/300" alt="Avatar" />
-          <div class="msg-text-container">
-            <div class="msg-name">Metadata Test</div>
-            <p>
-              Interview with the vampire Interview with the vampire Interview
-              with the vampire Interview with the vampire
-            </p>
-          </div>
-          <div class="address-container">
-            Chain: META (5), TokenID: 2
-          </div>
-          <div class="address-container-2">
-            <a href="https://etherscan.io/address/0x8b0fefd94667fdd8cef52f8c1eeb5baec8d64a00">TECHNICETH</a>
-          </div>
-        </div>
-        <div class="msg-item-container">
-          <img src="http://placekitten.com/300/300" alt="Avatar" />
-          <div class="msg-text-container">
-            <div class="msg-name">Metadata Test</div>
-            <p>
-              Interview with the vampire Interview with the vampire Interview
-              with the vampire Interview with the vampire
-            </p>
-          </div>
-          <div class="address-container">
-            Chain: META (5), TokenID: 2
-          </div>
-          <div class="address-container-2">
-            <a href="https://etherscan.io/address/0x8b0fefd94667fdd8cef52f8c1eeb5baec8d64a00">TECHNICETH</a>
-          </div>
-        </div>
-        <div class="msg-item-container">
-          <img src="http://placekitten.com/300/300" alt="Avatar" />
-          <div class="msg-text-container">
-            <div class="msg-name">Metadata Test</div>
-            <p>
-              Interview with the vampire Interview with the vampire Interview
-              with the vampire Interview with the vampire
-            </p>
-          </div>
-          <div class="address-container">
-            Chain: META (5), TokenID: 2
-          </div>
-          <div class="address-container-2">
+          <div class="ts-app-address-container">
             <a href="https://etherscan.io/address/0x8b0fefd94667fdd8cef52f8c1eeb5baec8d64a00">TECHNICETH</a>
           </div>
         </div>
       </div>
       <form>
         <input
-          class="cl-form-input cl-form-input--small cl-form-input--secondary"
+          class="ts-app-form-input ts-app-form-input--small ts-app-form-input--secondary"
           type="text"
           placeholder="Message"
         /><button
           type="submit"
-          class="cl-submit cl-submit--small cl-submit--secondary"
+          class="ts-app-submit ts-app-submit--small ts-app-submit--secondary"
         >
           Submit
         </button>
