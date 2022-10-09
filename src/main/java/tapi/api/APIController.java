@@ -394,7 +394,10 @@ public class APIController
                           Model model)
     {
         //inject JSON
+        for ()
 
+
+        model.addAttribute("account", "'" + account + "'");
 
         return "client_view_front_fallback";
     }
