@@ -241,25 +241,6 @@
 
       <div class="push"></div>
 
-    <!-- <div class="ts-app-footer">
-      <div
-        class="ts-app-wrapper ts-app-wrapper--medium ts-app-wrapper--primary"
-      >
-        <form>
-          <input
-            class="ts-app-form-input ts-app-form-input--small ts-app-form-input--secondary"
-            type="text"
-            placeholder="Message"
-            maxlength="128"
-          /><button
-            type="submit"
-            class="ts-app-submit ts-app-submit--small ts-app-submit--primary"
-          >
-            Submit
-          </button>
-        </form>
-      </div>
-    </div> -->
 
     <script>
 
@@ -274,7 +255,7 @@
           return data.json();
         })
         .then(post => {
-          if(post && post.data) {
+          if(post.data) {
             var allMessages = post.data;
 
             // if messages is empty, add all
@@ -297,7 +278,7 @@
 
       function embedMessages(messages) {
 
-        if(messages && messages.length) {
+        if(messages.length) {
 
           messages.map((item, index) => {
 
@@ -305,23 +286,7 @@
 
             setTimeout(() => {
 
-              elRef.innerHTML += `
-                <div class="ts-app-msg-item-container">
-                    <img src="${item.img}" alt="Avatar" />
-                    <div class="msg-text-container">
-                      <p>${item.msg}</p>
-                    </div>
-                    <div class="ts-app-meta-container">Symbol: ${item.symbol} (${item.chain}), TokenID: ${item.tokenid}</div>
-                    <div class="ts-app-address-container">
-                      <a
-                        target="_BLANK"
-                        href="https://goerli.etherscan.io/address/${item.tokenaddr}"
-                        >Etherscan</a
-                      >
-                    </div>
-                  </div>
-                </div>
-              `;
+              elRef.innerHTML += '<div class="ts-app-msg-item-container"><img src="http://placekitten.com/300/300" alt="Avatar" /><div class="msg-text-container"><p>${item.msg}</p></div><div class="ts-app-meta-container">Symbol: ${item.symbol} (${item.chain}), TokenID: ${item.tokenid}</div><div class="ts-app-address-container"><a target="_BLANK" href="https://goerli.etherscan.io/address/${item.tokenaddr}">Etherscan</a></div></div>';
 
             }, index * 200);
             
