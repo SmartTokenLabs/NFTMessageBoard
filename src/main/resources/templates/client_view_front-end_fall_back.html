@@ -241,7 +241,7 @@
 
       <div class="push"></div>
 
-    <div class="ts-app-footer">
+    <!-- <div class="ts-app-footer">
       <div
         class="ts-app-wrapper ts-app-wrapper--medium ts-app-wrapper--primary"
       >
@@ -259,7 +259,7 @@
           </button>
         </form>
       </div>
-    </div>
+    </div> -->
 
     <script>
 
@@ -307,16 +307,16 @@
 
               elRef.innerHTML += `
                 <div class="ts-app-msg-item-container">
-                    <img src="http://placekitten.com/300/300" alt="Avatar" />
+                    <img src="${item.img}" alt="Avatar" />
                     <div class="msg-text-container">
                       <p>${item.msg}</p>
                     </div>
-                    <div class="ts-app-meta-container">Chain: ${item.symbol} (${item.chain}), TokenID: ${item.tokenid}</div>
+                    <div class="ts-app-meta-container">Symbol: ${item.symbol} (${item.chain}), TokenID: ${item.tokenid}</div>
                     <div class="ts-app-address-container">
                       <a
                         target="_BLANK"
-                        href="https://etherscan.io/address/${item.tokenaddr}"
-                        >${item.name}</a
+                        href="https://goerli.etherscan.io/address/${item.tokenaddr}"
+                        >Etherscan</a
                       >
                     </div>
                   </div>
