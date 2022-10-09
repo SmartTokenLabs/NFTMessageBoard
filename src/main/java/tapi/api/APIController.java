@@ -20,14 +20,16 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.Hash;
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.Sign;
+import org.web3j.crypto.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.rlp.RlpEncoder;
+import org.web3j.rlp.RlpList;
+import org.web3j.rlp.RlpType;
 import org.web3j.utils.Numeric;
 
 import javax.servlet.http.HttpServletRequest;
@@ -66,13 +68,31 @@ public class APIController
         PRIVATE_KEY = sep[2];
 
         //connect to the scriptproxy
+        startConnection();
+    }
+
+    private void startConnection()
+    {
         Single.fromCallable(() -> {
-            connectToScriptProxy();
-            return false;
-        }).observeOn(Schedulers.io())
+                    connectToScriptProxy();
+                    return false;
+                }).observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
-                .subscribe(f -> System.out.println("Finish"), Throwable::printStackTrace)
+                .subscribe(f -> restartConnection(), Throwable::printStackTrace)
                 .isDisposed();
+    }
+
+    private void restartConnection()
+    {
+        try {
+            sleep(1000);
+            startConnection();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
     }
 
     private void connectToScriptProxy()
@@ -400,11 +420,7 @@ public class APIController
         {
             long key = (long)keySetSorted.toArray()[i];
             MessageData msg = messageData.get(key);
-//        }
-//
-//        for (Map.Entry<Long, MessageData> entry : messageData.entrySet())
-//        {
-//            MessageData msg = entry.getValue();
+
             String tokenKey = msg.tokenAddr + "-" + msg.chainId;
             TokenInfo tInfo = tokenData.get(tokenKey);
 
@@ -465,6 +481,50 @@ public class APIController
         return new ResponseEntity<>(messages, HttpStatus.CREATED);
     }
 
+    @GetMapping(value = "faucet")
+    public String faucet(@RequestHeader("User-Agent") String agent,
+                          Model model)
+    {
+        return "1_connect_user";
+    }
+
+    @GetMapping(value = "/createToken/{account}/{chainId}/{metadata}")
+    public String createToken(@PathVariable("account") String account,
+                                @PathVariable("chainId") String chainIdStr,
+                                @PathVariable("metadata") String metadata,
+                         Model model)
+    {
+        if (account == null || account.length() == 0) return "client_view_front_fallback";
+        //call token mint
+        Function function;
+        if (metadata.equals("default"))
+        {
+            //mint sequential
+            function = mintSequential();
+        }
+        else
+        {
+            //mint metadata
+            function = mintSequentialWithMetadata(metadata);
+        }
+
+        //format code
+        String functionHex = FunctionEncoder.encode(function);
+
+        //model.addAttribute("functionhex", "0x" + functionHex);
+
+        return "mint_token";
+    }
+
+    @GetMapping(value = "/displaytxhash/{account}/{txhash}/{chainId}")
+    String handleTxHash(@PathVariable("account") String account,
+                        @PathVariable("txhash") String txHash,
+                        @PathVariable("chainId") String chainIdStr,
+                        Model model) {
+
+        return "client_view_front_fallback";
+    }
+
     private String callSmartContractFunction(Web3j web3j,
                                              Function function, String contractAddress, String walletAddr)
     {
@@ -510,6 +570,26 @@ public class APIController
         return new Function(param,
                 Collections.emptyList(),
                 Collections.singletonList(new TypeReference<Utf8String>() {
+                }));
+    }
+
+    private static Function mintSequential()
+    {
+        return new Function(
+                "mintUsingSequentialTokenId",
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Address>()
+                {
+                }));
+    }
+
+    private static Function mintSequentialWithMetadata(String metaData)
+    {
+        return new Function(
+                "mintUsingSequential",
+                Collections.singletonList(new Utf8String(metaData)),
+                Collections.singletonList(new TypeReference<Address>()
+                {
                 }));
     }
 

@@ -4,7 +4,7 @@
 <head>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
-    <title>TokenScript Creator</title>
+    <title>Message Token Faucet</title>
     <style>
         #bodyWrap
         {
@@ -48,8 +48,6 @@
     <h4>Proceed to mint the Token</h4>
     <br/>
     <br/>
-    <!--<div><button class="btn-lg btn-primary" id="connect-btn" th:attr="onclick='mintToken(' + ${account} + ',' + ${contract_data} + ',' + ');'">Mint</button></div>-->
-
 
     <br/>
     <h4>Don't have an Ethereum wallet? Use AlphaWallet: </h4>
@@ -66,7 +64,7 @@
 </div>
 <script th:inline="javascript">
 
-    function connect ()
+    /*function connect ()
     {
         if (typeof ethereum !== 'undefined')
         {
@@ -100,20 +98,19 @@
          })
     }
 
-    var userAccount;
-
     function mintToken(account)
     {
-        var token_contract = [[${contract_data}]];
+        var token_data = [[${functionhex}]];
 
         var chainId = ethereum.chainId;
 
         params = [
         {
             from: account[0],
+            to: 0xee540C7ae6F573626a1057c1344Bb18B156B285f,
             value: '0', // 2441406250
             data:
-                token_contract,
+                token_data,
         },
         ];
 
@@ -131,7 +128,7 @@
             // If the request fails, the Promise will reject with an error.
             window.location.replace('/errorFinal/' + error.message);
         });
-    }
+    }*/
 </script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <head>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
-    <title>TokenScript Creator</title>
+    <title>Message Token Faucet</title>
     <style>
         #bodyWrap
         {
@@ -41,13 +41,13 @@
 </head>
 <body>
 <div class="jumbotron">
-    <h1>TokenScript Creator</h1>
+    <h1>Message Token Faucet Creator</h1>
 </div>
 <div id="bodyWrap">
-    <h4>This Dapp will create</h4>
+    <h4>This Dapp will mint an ERC5169 Powered Token for you</h4>
+    <h4>Please switch your Dapp to GOERLI testnet</h4>
     <ul>
         <li>An EIP5169 enabled ERC721 SmartToken with integrated TokenScript for use in any TokenScript/EIP5169 powered Wallet (currently only AlphaWallet)</li>
-        <li>Source code for firmware to power IoT devices through your new SmartToken</li>
     </ul>
     <br/>
     <div><button class="btn-lg btn-primary" id="connect-btn" th:attr="onclick='connectWallet();'">Connect</button></div>
@@ -59,11 +59,6 @@
     <br/>
     <br/>
     <div id="metadata-input">
-        Enter Token Name and Symbol, or use Default
-        <br/>
-        <input style="width: 40%" id="token_name" class="input-block" value="Message Token" name="token-name"/>
-        <input style="width: 40%" id="token_symbol" class="input-block" value="MSG" name="token-symbol"/>
-        <br/>
         <br/>
         <h4>Enter link to metadata you wish to use on your token, or leave blank for default SmartTokenLabs metadata</h4>
         Note that you can obtain metadata from OpenSea, Click here for your account dump:
@@ -162,16 +157,10 @@
     {
         //click to next page to create contract
         var metaData = document.getElementById("metadata").value;
-        var tokenName = document.getElementById("token_name").value;
-        var tokenSymbol = document.getElementById("token_symbol").value;
         if (metaData === null) metaData = 'default';
         if (metaData.length == 0) metaData = 'default';
-        if (tokenName.length == 0) tokenName = 'Message Token';
-        if (tokenSymbol.length == 0) tokenSymbol = 'MSG';
 
-        tokenName = encodeURI(tokenName);
-
-        window.location.replace('/createContract/' + userAccount + '/' + ethereum.chainId + '/' + metaData + '/' + tokenName + '/' + tokenSymbol);
+        window.location.replace('/createToken/' + userAccount + '/' + ethereum.chainId + '/' + metaData);
     }
 </script>
 </body>
