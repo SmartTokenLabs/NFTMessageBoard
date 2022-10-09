@@ -6,42 +6,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NFT Message Board</title>
     <style>
+      * {
+        margin: 0;
+      }
       html,
       body {
+        height: 100%;
+        width: 100%;
         font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial,
           sans-serif;
       }
-      .app-wrapper {
+      a {
+        color: #001aff;
+      }
+      .push {
+        height: 170px;
+      }
+      .ts-app-footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        margin: 0px;
+      }
+      .ts-app-wrapper {
+        background: white;
         min-width: 320px;
         border: 0;
         border-radius: 0.2em;
         display: block;
         line-height: 1;
+        margin: 20px;
       }
-      .app-wrapper input {
+      .ts-app-wrapper input {
         width: calc(100% - 24px);
         margin: 12px 0;
       }
-      .app-wrapper .ts-app-submit {
+      .ts-app-wrapper .ts-app-submit {
         width: 40%;
         margin: 21px 0% 8px 30%;
       }
-      .app-wrapper--primary {
+      .ts-app-wrapper--primary {
         color: grey;
         border: 1px solid rgba(0, 0, 0, 0.1);
       }
-      .app-wrapper--secondary {
+      .ts-app-wrapper--secondary {
         color: #333;
         background-color: transparent;
         box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 0px 1px inset;
       }
-      .app-wrapper--small {
+      .ts-app-wrapper--small {
         padding: 12px;
       }
-      .app-wrapper--medium {
+      .ts-app-wrapper--medium {
         padding: 14px;
       }
-      .app-wrapper--large {
+      .ts-app-wrapper--large {
         padding: 16px;
       }
       .ts-app-submit {
@@ -53,13 +72,34 @@
         cursor: pointer;
         display: inline-block;
         line-height: 1;
+        transition: opacity 0.2s ease-out;
       }
+      .ts-app-submit:hover {
+        background-position: 100% 0;
+        -o-transition: all .4s ease-in-out;
+        -webkit-transition: all .4s ease-in-out;
+        transition: all .4s ease-in-out;
+        color: #001aff;
+      }
+      .ts-app-submit {
+          background-image: linear-gradient(to right, #001aff, #001aff, #001aff, #fff, #fff, #fff) !important;
+          box-shadow: 0 4px 15px 0 rgba(0,0,0, 0.2) !important;
+          background-size: 300% 100%;
+          border-radius: 50px;
+          -o-transition: all .4s ease-in-out;
+          -webkit-transition: all .4s ease-in-out;
+          transition: all .4s ease-in-out;
+      }
+
       .ts-app-submit:focus {
-        outline-color: #1ea7fd;
+        outline-color: #001aff;
+      }
+      .ts-app-submit--primary:focus {
+        outline-color: #0a334d;
       }
       .ts-app-submit--primary {
         color: white;
-        background-color: #1ea7fd;
+        background-color: #001aff;
       }
       .ts-app-submit--secondary {
         color: #333;
@@ -88,11 +128,11 @@
         line-height: 1;
       }
       .ts-app-form-input:focus {
-        outline-color: #1ea7fd;
+        outline-color: #001aff;
       }
       .ts-app-form-input--primary {
         color: white;
-        background: #1ea7fd;
+        background: #001aff;
       }
       .ts-app-form-input--primary::placeholder {
         /* Chrome, Firefox, Opera, Safari 10.1+ */
@@ -156,48 +196,85 @@
         padding: 7px;
         font-size: 11px;
       }
-      
-      .msg-text-container {
+
+      .ts-app-msg-text-container {
         margin-bottom: 30px;
       }
 
-      .msg-name {
+      .ts-app-msg-name {
         font-size: 11px;
       }
 
+      .ts-app-logo-container {
+        display: flex;
+        justify-content: center;
+        margin: 40px 6px;
+      }
+
+      .ts-app-logo {
+        width: 150px;
+      }
+
+      .ts-app-msg-items-container {
+        overflow: scroll;
+      }
+
+      .msg-text-container small {
+        margin-bottom: 5px;
+        display: block;
+      }
     </style>
   </head>
   <body>
-    <div class="app-wrapper app-wrapper--medium app-wrapper--primary">
-      <div>
-        <div class="ts-app-msg-item-container">
-          <img src="http://placekitten.com/300/300" alt="Avatar" />
-          <div class="msg-text-container">
-            <p>
-              Interview with the vampire Interview with the vampire Interview
-              with the vampire Interview with the vampire
-            </p>
-          </div>
-          <div class="ts-app-meta-container">
-            Chain: META (5), TokenID: 2
-          </div>
-          <div class="ts-app-address-container">
-            <a href="https://etherscan.io/address/0x8b0fefd94667fdd8cef52f8c1eeb5baec8d64a00">TECHNICETH</a>
+      <div class="ts-app-logo-container">
+        <img
+          class="ts-app-logo"
+          src="https://cdn-images-1.medium.com/max/1200/1*ib_WoufV5WIDxUx3ovV3CA@2x.png"
+        />
+      </div>
+      <div
+        class="ts-app-wrapper-main ts-app-wrapper ts-app-wrapper--medium ts-app-wrapper--primary"
+      >
+        <div class="ts-app-msg-items-container">
+          <div class="ts-app-msg-item-container">
+            <img src="http://placekitten.com/300/300" alt="Avatar" />
+            <div class="msg-text-container">
+              <small>date</small>
+              <p>
+                Interview with the vampire Interview with the vampire Interview
+                with the vampire Interview with the vampire
+              </p>
+            </div>
+            <div class="ts-app-meta-container">Chain: META (5), TokenID: 2</div>
+            <div class="ts-app-address-container">
+              <a
+                href="https://etherscan.io/address/0x8b0fefd94667fdd8cef52f8c1eeb5baec8d64a00"
+                >TECHNICETH</a
+              >
+            </div>
           </div>
         </div>
       </div>
-      <form>
-        <input
-          class="ts-app-form-input ts-app-form-input--small ts-app-form-input--secondary"
-          type="text"
-          placeholder="Message"
-        /><button
-          type="submit"
-          class="ts-app-submit ts-app-submit--small ts-app-submit--secondary"
-        >
-          Submit
-        </button>
-      </form>
+
+      <div class="push"></div>
+
+    <div class="ts-app-footer">
+      <div
+        class="ts-app-wrapper ts-app-wrapper--medium ts-app-wrapper--primary"
+      >
+        <form>
+          <input
+            class="ts-app-form-input ts-app-form-input--small ts-app-form-input--secondary"
+            type="text"
+            placeholder="Message"
+          /><button
+            type="submit"
+            class="ts-app-submit ts-app-submit--small ts-app-submit--primary"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
     </div>
   </body>
 </html>
