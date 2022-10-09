@@ -1,6 +1,8 @@
 # NFTMessageBoard
 NFTMessageBoard For ETH Global Hackathon
 
+Live Demo: http://www.smarttokenlabs.duckdns.org:8080/ 
+
 To run, create a file 'keys.secret' which is one level above the project directory (ie in the same directory as ```/NFTMessageBoard```)
 
 keys.secret should contain:
