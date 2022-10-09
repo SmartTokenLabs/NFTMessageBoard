@@ -9,15 +9,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.utils.Numeric;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,12 +34,14 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import static java.lang.Thread.sleep;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction;
 
 @Controller
 @RequestMapping("/")
@@ -40,25 +49,11 @@ public class APIController
 {
     private static final String ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-    private final Map<String, ScriptData> pkMap = new ConcurrentHashMap<>();
+    private final Map<String, TokenInfo> tokenData = new ConcurrentHashMap<>();
 
     private final String INFURA_KEY;
     private final String INFURA_IPFS_KEY;
     private final String PRIVATE_KEY;
-
-    private static class ScriptData
-    {
-        String privateKey;
-        String contractAddress;
-        String scriptFile;
-
-        public ScriptData(String pk, String ca, String sf)
-        {
-            privateKey = pk;
-            contractAddress = ca;
-            scriptFile = sf;
-        }
-    }
 
     @Autowired
     public APIController()
@@ -82,8 +77,6 @@ public class APIController
         byte[] buffer = new byte[512];
         //establish connection to server
         try (Socket socket = new Socket("scriptproxy.smarttokenlabs.com", 8003))
-
-        //try (Socket socket = new Socket("192.168.43.182", 8003))
         {
             //establish connection
             InputStream input = socket.getInputStream();
@@ -116,12 +109,13 @@ public class APIController
                             OutputStream output = socket.getOutputStream();
                             byte[] response = signChallenge(credentials, buffer, len);
                             output.write(response);
+                            output.flush();
                             break;
 
                         case 0x04: //receive API
                             APIReturn received = scanAPI(buffer, len);
                             System.out.println("YOLESS: " + received.apiName);
-                            handleAPIReturn(received);
+                            responseToAPI(socket, handleAPIReturn(received));
                             //ec recover
                             //check message is from
                             //add message, find token name
@@ -140,7 +134,18 @@ public class APIController
         }
     }
 
-    private void handleAPIReturn(APIReturn received)
+    private void responseToAPI(Socket socket, boolean pass) throws IOException
+    {
+        OutputStream output = socket.getOutputStream();
+        byte[] writeBytes = new byte[5];
+        writeBytes[0] = 0x08;
+        System.arraycopy(pass ? "pass".getBytes(UTF_8) : "fail".getBytes(UTF_8), 0, writeBytes, 1, 4);
+        output.write(writeBytes);
+        output.flush();
+    }
+
+
+    private boolean handleAPIReturn(APIReturn received)
     {
         switch (received.apiName)
         {
@@ -152,42 +157,54 @@ public class APIController
                 String chainStr = received.params.get("chain");
                 String sig = received.params.get("sig");
 
+                long chainId = parseStringValue(chainStr);
+                long tokenId = parseStringValue(tokenIdStr);
+
                 //recover wallet address
                 String walletAddr = recoverAddress(message, sig);
 
+                Web3j web3j = EthereumNode.createWeb3jNode(chainId, INFURA_KEY);
+
                 // pull token balance
                 // do they own this token?
-                boolean isOwned = isOwned(walletAddr, tokenAddress, tokenIdStr, chainStr);
+                boolean isOwned = isOwned(web3j, walletAddr, tokenAddress, tokenId);
+
+                if (!isOwned) return false; //early return if not owned (note we use ECRecover to validate ownership)
 
                 // find token details
-                // populate fields
+                // get name and symbol of token
+                TokenInfo thisToken = getTokenInfo(web3j, tokenAddress, chainId, walletAddr);
 
-                System.out.println("YOLESS: " + tokenAddress);
-                System.out.println("YOLESS: " + walletAddr);
+                // TODO: Now add to the stored message list
                 break;
             default:
                 break;
         }
-    }
-
-    private boolean isOwned(String walletAddr, String tokenAddress, String tokenIdStr, String chainStr)
-    {
-        long chainId = Long.parseLong(chainStr);
-        Web3j web3j = EthereumNode.createWeb3jNode(chainId, INFURA_KEY);
-
 
         return true;
     }
 
-
-    private static Function ownerOf(BigInteger token)
+    private TokenInfo getTokenInfo(Web3j web3j, String tokenAddress, long chainId, String walletAddr)
     {
-        return new Function(
-                "ownerOf",
-                Collections.singletonList(new Uint256(token)),
-                Collections.singletonList(new TypeReference<Address>()
-                {
-                }));
+        String tokenKey = tokenAddress + "-" + chainId;
+        TokenInfo tokenInfo = tokenData.get(tokenKey);
+
+        if (tokenInfo == null)
+        {
+            //get name and symbol and cache to tokenData
+            String name = callSmartContractFunction(web3j, stringParam("name"), tokenAddress, walletAddr);
+            String symbol = callSmartContractFunction(web3j, stringParam("symbol"), tokenAddress, walletAddr);
+            tokenInfo = new TokenInfo(name, symbol);
+            tokenData.put(tokenKey, tokenInfo);
+        }
+
+        return tokenInfo;
+    }
+
+    private boolean isOwned(Web3j web3j, String walletAddr, String tokenAddress, long tokenId)
+    {
+        String owner = callSmartContractFunction(web3j, ownerOf(BigInteger.valueOf(tokenId)), tokenAddress, walletAddr);
+        return owner != null && owner.equalsIgnoreCase(walletAddr);
     }
 
     private static String recoverAddress(String message, String signatureStr)
@@ -201,7 +218,6 @@ public class APIController
 
             Sign.SignatureData sigData = sigFromByteArray(signature);
             BigInteger recoveredKey  = Sign.signedMessageHashToKey(msgHash, sigData);
-            //recoveredKeyHex = Numeric.toHexStringWithPrefixZeroPadded(recoveredKey, 128);// toHexStringWithPrefix(recoveredKey);
             recoveredAddr = "0x" + Keys.getAddress(recoveredKey);
         }
         catch (Exception e)
@@ -375,7 +391,55 @@ public class APIController
         return new ResponseEntity<>(messages, HttpStatus.CREATED);
     }
 
-    private long parseChainId(String chainIdStr)
+    private String callSmartContractFunction(Web3j web3j,
+                                             Function function, String contractAddress, String walletAddr)
+    {
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        try
+        {
+            Transaction transaction
+                    = createEthCallTransaction(walletAddr, contractAddress, encodedFunction);
+            EthCall response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send();
+
+            List<Type> responseValues = FunctionReturnDecoder.decode(response.getValue(), function.getOutputParameters());
+
+            if (!responseValues.isEmpty())
+            {
+                return responseValues.get(0).getValue().toString();
+            }
+            else if (response.hasError() && response.getError().getCode() == 3) //reverted
+            {
+                return "";
+            }
+        }
+        catch (Exception e)
+        {
+            //
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private static Function ownerOf(BigInteger token)
+    {
+        return new Function(
+                "ownerOf",
+                Collections.singletonList(new Uint256(token)),
+                Collections.singletonList(new TypeReference<Address>()
+                {
+                }));
+    }
+
+    private static Function stringParam(String param) {
+        return new Function(param,
+                Collections.emptyList(),
+                Collections.singletonList(new TypeReference<Utf8String>() {
+                }));
+    }
+
+    private long parseStringValue(String chainIdStr)
     {
         if (chainIdStr.startsWith("0x"))
         {
@@ -425,4 +489,17 @@ public class APIController
         }
         return new String(buffer);
     }
+
+    private static class TokenInfo
+    {
+        final String tokenName;
+        final String tokenSymbol;
+
+        public TokenInfo(String name, String symbol)
+        {
+            tokenName = name;
+            tokenSymbol = symbol;
+        }
+    }
+
 }
