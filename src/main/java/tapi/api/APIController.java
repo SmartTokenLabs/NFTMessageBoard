@@ -595,13 +595,16 @@ public class APIController
 
     private long parseStringValue(String chainIdStr)
     {
-        if (chainIdStr.startsWith("0x"))
-        {
-            return Numeric.toBigInt(chainIdStr).longValue();
+        try {
+            if (chainIdStr.startsWith("0x")) {
+                return Numeric.toBigInt(chainIdStr).longValue();
+            } else {
+                return Long.parseLong(chainIdStr);
+            }
         }
-        else
+        catch (Exception e)
         {
-            return Long.parseLong(chainIdStr);
+            return 5;
         }
     }
 
