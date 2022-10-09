@@ -1,5 +1,9 @@
 package tapi.api;
 
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +41,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutionException;
 
 import static java.lang.Thread.sleep;
@@ -50,6 +55,7 @@ public class APIController
     private static final String ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
     private final Map<String, TokenInfo> tokenData = new ConcurrentHashMap<>();
+    private final ConcurrentLinkedDeque<MessageData> messageData = new ConcurrentLinkedDeque<>();
 
     private final String INFURA_KEY;
     private final String INFURA_IPFS_KEY;
@@ -65,9 +71,16 @@ public class APIController
         PRIVATE_KEY = sep[2];
 
         //connect to the scriptproxy
-        //TODO: Put on a thread
-        connectToScriptProxy();
+        Single.fromCallable(() -> {
+            connectToScriptProxy();
+            return false;
+        }).observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .subscribe(f -> System.out.println("Finish"), Throwable::printStackTrace)
+                .isDisposed();
     }
+
+
 
     private void connectToScriptProxy()
     {
@@ -116,11 +129,6 @@ public class APIController
                             APIReturn received = scanAPI(buffer, len);
                             System.out.println("YOLESS: " + received.apiName);
                             responseToAPI(socket, handleAPIReturn(received));
-                            //ec recover
-                            //check message is from
-                            //add message, find token name
-                            //check balance & add to message board
-                            //recode this client as separate class with callback
                             break;
                     }
                 }
@@ -143,7 +151,6 @@ public class APIController
         output.write(writeBytes);
         output.flush();
     }
-
 
     private boolean handleAPIReturn(APIReturn received)
     {
@@ -175,7 +182,10 @@ public class APIController
                 // get name and symbol of token
                 TokenInfo thisToken = getTokenInfo(web3j, tokenAddress, chainId, walletAddr);
 
-                // TODO: Now add to the stored message list
+                //String tAddr, long cId, long tId, String msg
+                MessageData msg = new MessageData(tokenAddress, chainId, tokenId, message);
+                messageData.add(msg);
+
                 break;
             default:
                 break;
@@ -385,8 +395,28 @@ public class APIController
     @RequestMapping(value = "getMessages", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity getMessages(HttpServletRequest request) throws InterruptedException, ExecutionException {
 
+        //output a JSON
+        JSONArray jsonArray = new JSONArray();
+        for (MessageData msgData : messageData)
+        {
+            String tKey = msgData.tokenAddr + "-" + msgData.chainId;
+            JSONObject obj = new JSONObject();
+            TokenInfo tInfo = tokenData.get(tKey);
+            if (tInfo == null) continue;
+            obj.put("tokenaddr", msgData.tokenAddr);
+            obj.put("chain", String.valueOf(msgData.chainId));
+            obj.put("tokenid", String.valueOf(msgData.tokenId));
+            obj.put("name", tInfo.tokenName);
+            obj.put("symbol", tInfo.tokenSymbol);
+            obj.put("msg", msgData.message);
 
-        String messages = "{\"name\":\"Some JSON\"}";
+            jsonArray.put(obj);
+        }
+
+        JSONObject outerObj = new JSONObject();
+        outerObj.put("data", jsonArray);
+
+        String messages = outerObj.toString();
 
         return new ResponseEntity<>(messages, HttpStatus.CREATED);
     }
@@ -502,4 +532,19 @@ public class APIController
         }
     }
 
+    private static class MessageData
+    {
+        final String tokenAddr;
+        final long chainId;
+        final long tokenId;
+        final String message;
+
+        public MessageData(String tAddr, long cId, long tId, String msg)
+        {
+            tokenAddr = tAddr;
+            chainId = cId;
+            tokenId = tId;
+            message = msg;
+        }
+    }
 }
